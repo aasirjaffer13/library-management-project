@@ -1,0 +1,37 @@
+@startuml
+title Library Management System - Workflow Diagram
+
+|Librarian|
+start
+:Login;
+:Select "Issue Book" tab;
+|LoanPanel|
+:Enter Member ID;
+:Enter Book ISBN;
+:Click "Issue";
+|LoanService|
+if (Member exists?) then (no)
+:Show error;
+stop
+endif
+if (Book exists?) then (no)
+:Show error;
+stop
+endif
+if (Book available?) then (no)
+:Show error;
+stop
+endif
+if (Loan limit reached?) then (yes)
+:Show error;
+stop
+endif
+if (Unpaid fines?) then (yes)
+:Show error;
+stop
+endif
+:Create Loan record;
+:Update book availability;
+:Show success;
+stop
+@enduml

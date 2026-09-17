@@ -1,0 +1,221 @@
+@startuml
+title Library Management System - Class Diagram
+
+package "model" {
+    class User {
+        +Long id
+        +String username
+        +String passwordHash
+        +String salt
+        +String fullName
+        +UserRole role
+        +String email
+        +String phone
+        +String address
+        +boolean active
+    }
+
+    class Book {
+        +Long id
+        +String isbn
+        +String title
+        +String author
+        +BookCategory category
+        +String publisher
+        +String edition
+        +int totalCopies
+        +int availableCopies
+        +String location
+    }
+
+    class Member {
+        +Long id
+        +String memberNumber
+        +String fullName
+        +String email
+        +String phone
+        +String address
+        +LocalDate membershipDate
+        +boolean active
+    }
+
+    class Loan {
+        +Long id
+        +Long bookId
+        +Long memberId
+        +Long issuedBy
+        +LocalDate issueDate
+        +LocalDate dueDate
+        +LocalDate returnDate
+        +LoanStatus status
+    }
+
+    class Reservation {
+        +Long id
+        +Long bookId
+        +Long memberId
+        +LocalDate reservationDate
+        +LocalDate expiryDate
+        +ReservationStatus status
+    }
+
+    class Fine {
+        +Long id
+        +Long loanId
+        +Long memberId
+        +BigDecimal amount
+        +String reason
+        +boolean paid
+    }
+
+    enum UserRole { ADMIN, LIBRARIAN, CLERK }
+    enum BookCategory { FICTION, SCIENCE, TECHNOLOGY, HISTORY, BIOGRAPHY, OTHER }
+    enum LoanStatus { ACTIVE, RETURNED, OVERDUE }
+    enum ReservationStatus { PENDING, FULFILLED, CANCELLED, EXPIRED }
+}
+
+package "repository" {
+    interface UserRepository {
+        +User findByUsername(String)
+        +User findById(Long)
+        +List<User> findAll()
+        +User save(User)
+        +void update(User)
+        +void delete(Long)
+    }
+
+    interface BookRepository {
+        +Book findById(Long)
+        +Book findByIsbn(String)
+        +List<Book> findAll()
+        +List<Book> search(String, String, String, String)
+        +Book save(Book)
+        +void update(Book)
+        +void updateAvailability(Long, int)
+        +void delete(Long)
+    }
+
+    interface MemberRepository {
+        +Member findById(Long)
+        +Member findByMemberNumber(String)
+        +List<Member> findAll()
+        +Member save(Member)
+        +void update(Member)
+        +void delete(Long)
+    }
+
+    interface LoanRepository {
+        +Loan findById(Long)
+        +List<Loan> findByMemberId(Long)
+        +List<Loan> findByBookId(Long)
+        +List<Loan> findAll()
+        +List<Loan> findActiveLoans()
+        +List<Loan> findOverdueLoans()
+        +Loan save(Loan)
+        +void update(Loan)
+    }
+
+    interface ReservationRepository {
+        +Reservation findById(Long)
+        +List<Reservation> findByMemberId(Long)
+        +List<Reservation> findByBookId(Long)
+        +List<Reservation> findPendingByBookId(Long)
+        +List<Reservation> findAll()
+        +Reservation save(Reservation)
+        +void update(Reservation)
+    }
+
+    interface FineRepository {
+        +Fine findById(Long)
+        +List<Fine> findByMemberId(Long)
+        +List<Fine> findByLoanId(Long)
+        +BigDecimal sumUnpaidFines(Long)
+        +Fine save(Fine)
+        +void update(Fine)
+    }
+}
+
+package "service" {
+    class AuthService {
+        +User login(String, String)
+        +User register(User, String)
+        +void changePassword(Long, String, String)
+    }
+
+    class BookService {
+        +Book addBook(Book)
+        +Book updateBook(Book)
+        +void deleteBook(Long)
+        +List<Book> searchBooks(String, String, String, String)
+        +Book getBook(Long)
+    }
+
+    class MemberService {
+        +Member addMember(Member)
+        +Member updateMember(Member)
+        +void deactivateMember(Long)
+        +Member getMember(Long)
+    }
+
+    class LoanService {
+        +Loan issueBook(Long, Long, Long)
+        +Loan returnBook(Long, Long)
+        +List<Loan> getActiveLoans()
+        +List<Loan> getOverdueLoans()
+        +List<Loan> getMemberLoans(Long)
+    }
+
+    class ReservationService {
+        +Reservation reserveBook(Long, Long)
+        +void fulfillReservation(Long)
+        +void cancelReservation(Long)
+        +void expireReservations()
+    }
+
+    class FineService {
+        +void calculateFines()
+        +void markFinePaid(Long)
+        +BigDecimal getUnpaidFines(Long)
+    }
+
+    class StatisticsService {
+        +Statistics getStatistics()
+    }
+}
+
+package "ui" {
+    class LoginFrame
+    class MainFrame
+    class BookPanel
+    class MemberPanel
+    class LoanPanel
+    class ReservationPanel
+    class TransactionPanel
+    class StatisticsPanel
+    class CommonUI
+}
+
+UserRepository <|.. UserRepositoryImpl
+BookRepository <|.. BookRepositoryImpl
+MemberRepository <|.. MemberRepositoryImpl
+LoanRepository <|.. LoanRepositoryImpl
+ReservationRepository <|.. ReservationRepositoryImpl
+FineRepository <|.. FineRepositoryImpl
+
+AuthService --> UserRepository
+BookService --> BookRepository
+MemberService --> MemberRepository
+LoanService --> LoanRepository : uses\nLoanService --> BookRepository : uses\nLoanService --> MemberRepository : uses\nLoanService --> FineRepository : uses
+ReservationService --> ReservationRepository : uses\nReservationService --> BookRepository : uses\nReservationService --> MemberRepository : uses
+FineService --> FineRepository : uses\nFineService --> LoanRepository : uses
+StatisticsService --> BookRepository : uses\nStatisticsService --> MemberRepository : uses\nStatisticsService --> LoanRepository : uses\nStatisticsService --> FineRepository : uses
+
+LoginFrame --> AuthService
+MainFrame --> AuthService : uses\nMainFrame --> BookService : uses\nMainFrame --> MemberService : uses\nMainFrame --> LoanService : uses\nMainFrame --> ReservationService : uses\nMainFrame --> FineService : uses\nMainFrame --> StatisticsService : uses
+BookPanel --> BookService
+MemberPanel --> MemberService
+LoanPanel --> LoanService
+ReservationPanel --> ReservationService
+TransactionPanel --> LoanService : uses\nTransactionPanel --> FineService : uses
+StatisticsPanel --> StatisticsService
+@enduml

@@ -41,3 +41,7 @@ Thumbs.db
 derby.log
 derby.properties
 Database/
+
+# Runtime output files
+gui_err.txt
+gui_out.txt

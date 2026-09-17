@@ -1,0 +1,24 @@
+@startuml
+title Sequence Diagram - Login
+
+actor User
+participant LoginFrame
+participant AuthService
+participant UserRepository
+database H2
+
+User -> LoginFrame: Enter username/password
+LoginFrame -> AuthService: login(username, password)
+AuthService -> UserRepository: findByUsername(username)
+UserRepository -> H2: SELECT * FROM users WHERE username=?
+H2 --> UserRepository: User row
+UserRepository --> AuthService: User entity
+AuthService -> AuthService: Verify password hash
+alt Password valid
+    AuthService --> LoginFrame: User object
+    LoginFrame --> User: Show MainFrame
+else Password invalid
+    AuthService --> LoginFrame: AuthenticationException
+    LoginFrame --> User: Show error
+end
+@enduml

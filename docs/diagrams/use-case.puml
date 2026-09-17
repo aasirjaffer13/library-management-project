@@ -1,0 +1,48 @@
+@startuml
+title Library Management System - Use Case Diagram
+
+actor Admin
+actor Librarian
+actor Clerk
+
+package "Library Management System" {
+    usecase "Login" as UC1
+    usecase "Manage Books" as UC2
+    usecase "Manage Members" as UC3
+    usecase "Issue Book" as UC4
+    usecase "Return Book" as UC5
+    usecase "Manage Reservations" as UC6
+    usecase "View Transactions" as UC7
+    usecase "Manage Fines" as UC8
+    usecase "View Statistics" as UC9
+    usecase "Manage Users" as UC10
+}
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+Admin --> UC7
+Admin --> UC8
+Admin --> UC9
+Admin --> UC10
+
+Librarian --> UC1
+Librarian --> UC2
+Librarian --> UC3
+Librarian --> UC4
+Librarian --> UC5
+Librarian --> UC6
+Librarian --> UC7
+Librarian --> UC8
+Librarian --> UC9
+
+Clerk --> UC1
+Clerk --> UC4
+Clerk --> UC5
+Clerk --> UC7
+Clerk --> UC8
+Clerk --> UC9
+@enduml

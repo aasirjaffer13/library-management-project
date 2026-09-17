@@ -110,16 +110,63 @@ lib/
 
 ## How to Compile and Run from Terminal
 
+### Windows (PowerShell)
+
 ```powershell
-cd "Library-Management-System-JAVA"
+# Clone
+git clone https://github.com/aasirjaffer13/library-management-project.git
+
+# Enter repository
+cd library-management-project
+
+# Check Java
+java -version
+javac -version
+
+# Create build directory
+New-Item -ItemType Directory -Force -Path build | Out-Null
+
+# Collect source files
+$files = Get-ChildItem -Path src -Recurse -Filter "*.java" |
+    Select-Object -ExpandProperty FullName
 
 # Compile
-New-Item -ItemType Directory -Force -Path build | Out-Null
-$files = Get-ChildItem -Path src -Recurse -Filter "*.java" | Select-Object -ExpandProperty FullName
 javac -d build -cp "lib/h2-2.2.224.jar" --release 21 $files
 
-# Run
+# Run tests
+java -ea -cp "build;lib/h2-2.2.224.jar" test.AppTest
+
+# Run application
 java -cp "build;lib/h2-2.2.224.jar" app.LibraryApp
+```
+
+### Linux / macOS (Bash)
+
+```bash
+# Clone
+git clone https://github.com/aasirjaffer13/library-management-project.git
+
+# Enter repository
+cd library-management-project
+
+# Check Java
+java -version
+javac -version
+
+# Create build directory
+mkdir -p build
+
+# Compile
+javac -d build \
+  -cp "lib/h2-2.2.224.jar" \
+  --release 21 \
+  $(find src -name "*.java")
+
+# Run tests
+java -ea -cp "build:lib/h2-2.2.224.jar" test.AppTest
+
+# Run application
+java -cp "build:lib/h2-2.2.224.jar" app.LibraryApp
 ```
 
 ## Default Login
@@ -153,6 +200,26 @@ javac -d build -cp "lib/h2-2.2.224.jar" --release 21 $files
 # Run automated tests (33 tests)
 java -ea -cp "build;lib/h2-2.2.224.jar" test.AppTest
 ```
+
+## Non-Functional Requirements
+
+### 1. Usability
+The system provides a simple graphical interface with logically grouped modules for common library operations.
+
+### 2. Reliability
+Database operations validate input and preserve relationships between users, books, members, loans, reservations, and fines.
+
+### 3. Security
+Passwords are stored using SHA-256 hashing with salt rather than plain text, and access is controlled through user roles (Admin, Librarian, Clerk).
+
+### 4. Maintainability
+The application follows a layered architecture separating models, repositories, services, and UI components.
+
+### 5. Error Handling
+Invalid input and database errors are handled without terminating the application unexpectedly.
+
+### 6. Resource Efficiency
+The application uses an embedded H2 database and does not require a separate database server.
 
 ## Future Improvements
 

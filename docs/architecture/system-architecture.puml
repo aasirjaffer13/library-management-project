@@ -1,0 +1,113 @@
+@startuml
+title Library Management System - System Architecture
+
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+
+package "Presentation Layer" {
+    [LoginFrame]
+    [MainFrame]
+    [BookPanel]
+    [MemberPanel]
+    [LoanPanel]
+    [ReservationPanel]
+    [TransactionPanel]
+    [StatisticsPanel]
+    [CommonUI]
+}
+
+package "Service Layer" {
+    [AuthService]
+    [BookService]
+    [MemberService]
+    [LoanService]
+    [ReservationService]
+    [FineService]
+    [StatisticsService]
+}
+
+package "Data Access Layer" {
+    [UserRepository]
+    [BookRepository]
+    [MemberRepository]
+    [LoanRepository]
+    [ReservationRepository]
+    [FineRepository]
+}
+
+package "Database" {
+    [H2 Database]
+}
+
+' UI to Service dependencies
+[LoginFrame] --> [AuthService]
+[MainFrame] --> [AuthService]
+[MainFrame] --> [BookService]
+[MainFrame] --> [MemberService]
+[MainFrame] --> [LoanService]
+[MainFrame] --> [ReservationService]
+[MainFrame] --> [FineService]
+[MainFrame] --> [StatisticsService]
+
+[BookPanel] --> [BookService]
+[MemberPanel] --> [MemberService]
+[LoanPanel] --> [LoanService]
+[ReservationPanel] --> [ReservationService]
+[TransactionPanel] --> [LoanService]
+[TransactionPanel] --> [FineService]
+[StatisticsPanel] --> [StatisticsService]
+
+' Service to Repository dependencies
+[AuthService] --> [UserRepository]
+[BookService] --> [BookRepository]
+[MemberService] --> [MemberRepository]
+
+[LoanService] --> [LoanRepository]
+[LoanService] --> [BookRepository]
+[LoanService] --> [MemberRepository]
+[LoanService] --> [FineRepository]
+
+[ReservationService] --> [ReservationRepository]
+[ReservationService] --> [BookRepository]
+[ReservationService] --> [MemberRepository]
+
+[FineService] --> [FineRepository]
+[FineService] --> [LoanRepository]
+
+[StatisticsService] --> [BookRepository]
+[StatisticsService] --> [MemberRepository]
+[StatisticsService] --> [LoanRepository]
+[StatisticsService] --> [FineRepository]
+
+' Repository to Database
+[UserRepository] --> [H2 Database]
+[BookRepository] --> [H2 Database]
+[MemberRepository] --> [H2 Database]
+[LoanRepository] --> [H2 Database]
+[ReservationRepository] --> [H2 Database]
+[FineRepository] --> [H2 Database]
+
+note right of [H2 Database]
+    Embedded relational database
+    Auto-initializes schema on startup
+    Zero configuration required
+end note
+
+note bottom of "Presentation Layer"
+    Java Swing components
+    Event-driven UI
+    Role-based navigation
+end note
+
+note bottom of "Service Layer"
+    Business logic & validation
+    Transaction coordination
+    Rule enforcement
+end note
+
+note bottom of "Data Access Layer"
+    Repository pattern
+    Centralized SQL
+    CRUD operations
+end note
+@enduml

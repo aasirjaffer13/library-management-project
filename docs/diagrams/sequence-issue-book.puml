@@ -1,0 +1,50 @@
+@startuml
+title Sequence Diagram - Issue Book
+
+actor Librarian
+participant LoanPanel
+participant LoanService
+participant BookRepository
+participant MemberRepository
+participant LoanRepository
+database H2
+
+Librarian -> LoanPanel: Enter member ID, book ISBN
+LoanPanel -> LoanService: issueBook(memberId, bookId, issuedBy)
+LoanService -> MemberRepository: findById(memberId)
+MemberRepository -> H2: SELECT * FROM members WHERE id=?
+H2 --> MemberRepository: Member row
+MemberRepository --> LoanService: Member entity
+alt Member not found/active
+    LoanService --> LoanPanel: ValidationException
+    LoanPanel --> Librarian: Show error
+    stop
+end
+
+LoanService -> BookRepository: findById(bookId)
+BookRepository -> H2: SELECT * FROM books WHERE id=?
+H2 --> BookRepository: Book row
+BookRepository --> LoanService: Book entity
+alt Book not found/available
+    LoanService --> LoanPanel: ValidationException
+    stop
+end
+
+LoanService -> LoanService: Check loan limit
+LoanService -> LoanService: Check unpaid fines
+LoanService -> LoanRepository: countActiveLoans(memberId)
+LoanService -> FineRepository: sumUnpaidFines(memberId)
+
+LoanService -> LoanRepository: save(new Loan(...))
+LoanRepository -> H2: INSERT INTO loans ...
+H2 --> LoanRepository: Generated ID
+LoanRepository --> LoanService: Loan entity
+
+LoanService -> BookRepository: updateAvailability(bookId, -1)
+BookRepository -> H2: UPDATE books SET available_copies=...
+H2 --> BookRepository: Rows affected
+BookRepository --> LoanService: Success
+
+LoanService --> LoanPanel: Loan entity
+LoanPanel --> Librarian: Show success
+@enduml
